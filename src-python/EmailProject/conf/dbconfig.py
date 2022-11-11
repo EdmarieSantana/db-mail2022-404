@@ -1,7 +1,8 @@
 #Databse configuration information
 
 pg_config = {
-    'user' : 'manuel',
-    'passwd' : 'icom5016',
-    'dbname' : 'icom5016'
+    'user' : 'appusr',
+    'passwd' : 'e4&wy%g4trs.dg74hse4',
+    'dbname' : 'appdb',
+    'host':'proyecto.postgres.database.azure.com'
 }
