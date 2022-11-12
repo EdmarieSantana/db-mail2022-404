@@ -242,6 +242,60 @@ class EmailDAO:
             self.conn.commit()
         return email_info
 
+    def viewOutboxEmail(self,id_user,id_email):
+        cursor = self.conn.cursor()
+        query = "select email.id_email,subject,date_sended," \
+                "STRING_AGG(distinct u_receiver.email,',' order by u_receiver.email ASC),raw_content,u_sender.email " \
+                "from email " \
+                "inner join receive e on email.id_email = e.id_email " \
+                "inner join \"user\" u_receiver on u_receiver.id_user = e.id_user " \
+                "inner join \"user\" u_sender on u_sender.id_user = email.id_user_from " \
+                "where email.is_deleted_outbox is false and email.id_email = %s and email.id_user_from = %s" \
+                "group by email.id_email,subject,date_sended,raw_content,u_sender.email,e.is_readed,u_sender.id_user " \
+                "order by email.id_email desc"
+        cursor.execute(query, (id_email,id_user))
+        email_info = cursor.fetchone()
+        if email_info is None:
+            raise ValueError('The email info doesn´t exits')
+
+        return email_info
+
+    def replyEmail(self, id_user, id_email,subject,raw_content):
+        try:
+            cursor = self.conn.cursor()
+            query = "select e.id_user_from,e.subject,u.email from \"email\" e " \
+                    "inner join \"user\" u on e.id_user_from = u.id_user " \
+                    "where e.id_email = %s;"
+            cursor.execute(query, (id_email,))
+            email_to_reply = cursor.fetchone()
+            if email_to_reply is None:
+                raise ValueError("The email to reply doesn´t exits")
+            if subject is None:
+                subject = "Re: "+email_to_reply[1]
+
+            try:
+                query = "insert into \"email\"(subject, raw_content, date_sended,id_user_from)" \
+                        " values (%s, %s,current_timestamp, %s) returning id_email;"
+                cursor.execute(query, (subject, raw_content, id_user))
+            except psycopg2.errors.lookup("23503"):
+                raise ValueError('The id user doesn´t exits')
+
+            id_email_reply = cursor.fetchone()[0]
+
+            query = "insert into \"replies\"(id_email, id_email_reply_to)" \
+                    " values (%s, %s);"
+            cursor.execute(query, (id_email_reply, id_email))
+
+            query = "insert into \"receive\"(id_user, id_email)" \
+                    " values (%s, %s);"
+            cursor.execute(query, (email_to_reply[0], id_email_reply))
+
+            self.conn.commit()
+            return (id_email_reply,subject,email_to_reply[2])
+
+        except psycopg2.errors.lookup("23505"):
+            raise ValueError('The email is already taken')
+
 
 
 

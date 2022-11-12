@@ -95,6 +95,18 @@ def updateOutbox(id_user):
 def viewInboxEmail(id_user,id_email):
     return EmailHandler().viewInboxEmail(id_user,id_email);
 
+@app.route('/EmailApp/user/<int:id_user>/email/inbox/<int:id_email>', methods=['GET'])
+def viewInboxOutbox(id_user,id_email):
+    return EmailHandler().viewInboxEmail(id_user,id_email);
+
+
+
+@app.route('/EmailApp/user/<int:id_user>/email/inbox/<int:id_email>/reply', methods=['POST'])
+def replyEmail(id_user,id_email):
+    print("REQUEST: ", request.json)
+    email_data = request.json
+    return EmailHandler().createEmailReply(id_user,id_email,email_data);
+
 
 # END USER SERVICES
 

@@ -10,6 +10,9 @@ class EmailSchema(Schema):
     raw_content = fields.String(required=True)
     to = fields.List(fields.String(),required=True)
 
+class EmailReplySchema(Schema):
+    raw_content = fields.String(required=True)
+
 class EmailCategorySchema(Schema):
     category = fields.String(required=True)
 
@@ -208,6 +211,42 @@ class EmailHandler:
             return jsonify(Email=email_info_response), 200
         except ValueError as err:
             return jsonify(str(err)), 409
+
+    def viewOutboxEmail(self, id_user, id_email):
+        dao = EmailDAO()
+        try:
+            email_info = dao.viewOutboxEmail(id_user, id_email)
+            email_info_response = self.build_email_view_dict(email_info)
+            return jsonify(Email=email_info_response), 200
+        except ValueError as err:
+            return jsonify(str(err)), 409
+
+    def createEmailReply(self, id_user, id_email,json_data):
+        schema = EmailReplySchema()
+        try:
+            result = schema.load(json_data)
+        except ValidationError as err:
+            return jsonify(err.messages), 400
+
+        try:
+            subject = json_data['subject']
+        except KeyError:
+            subject = None
+
+        raw_content = json_data['raw_content']
+
+        dao = EmailDAO()
+        try:
+            (id_email_repliy,subject,to) = dao.replyEmail(id_user, id_email,subject,raw_content)
+            result = self.build_email_dict((id_email_repliy, subject, raw_content, [to]))
+            return jsonify(Email=result), 201
+        except ValueError as err:
+            return jsonify(str(err)), 409
+
+
+
+
+
 
 
 
