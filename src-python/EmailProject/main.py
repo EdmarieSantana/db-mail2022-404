@@ -50,6 +50,24 @@ def createNewEmail(id_user):
 def retreiveInbox(id_user):
     return EmailHandler().retreiveInbox(id_user);
 
+@app.route('/EmailApp/user/<int:id_user>/email/inbox/search', methods=['GET'])
+def searchInbox(id_user):
+    args = request.args;
+    field = args.get("field", default=None, type=str)
+    value = args.get("value", default=None, type=str)
+    return EmailHandler().searchInbox(id_user,field,value);
+
+
+@app.route('/EmailApp/user/<int:id_user>/email/<int:id_email>/setcategory', methods=['POST'])
+def setCategory(id_user,id_email):
+    json = request.json
+    return EmailHandler().setCategoryEmail(id_user,id_email,json);
+
+
+@app.route('/EmailApp/user/<int:id_user>/email/outbox', methods=['GET'])
+def retreiveOutbox(id_user):
+    return EmailHandler().retreiveOutbox(id_user);
+
 
 # END USER SERVICES
 
