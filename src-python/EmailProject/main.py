@@ -69,6 +69,33 @@ def retreiveOutbox(id_user):
     return EmailHandler().retreiveOutbox(id_user);
 
 
+@app.route('/EmailApp/user/<int:id_user>/email/outbox/search', methods=['GET'])
+def searchOutbox(id_user):
+    args = request.args;
+    field = args.get("field", default=None, type=str)
+    value = args.get("value", default=None, type=str)
+    return EmailHandler().searchOutbox(id_user,field,value);
+
+@app.route('/EmailApp/user/<int:id_user>/email/inbox/delete', methods=['POST'])
+def deleteInbox(id_user):
+    email_delete = request.json
+    return EmailHandler().deleteInbox(id_user,email_delete);
+
+@app.route('/EmailApp/user/<int:id_user>/email/outbox/delete', methods=['POST'])
+def deleteOutbox(id_user):
+    email_delete = request.json
+    return EmailHandler().deleteOutbox(id_user,email_delete);
+
+@app.route('/EmailApp/user/<int:id_user>/email/outbox/update', methods=['POST'])
+def updateOutbox(id_user):
+    email_update = request.json
+    return EmailHandler().updateOutbox(id_user,email_update);
+
+@app.route('/EmailApp/user/<int:id_user>/email/inbox/<int:id_email>', methods=['GET'])
+def viewInboxEmail(id_user,id_email):
+    return EmailHandler().viewInboxEmail(id_user,id_email);
+
+
 # END USER SERVICES
 
 
