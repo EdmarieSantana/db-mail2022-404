@@ -95,9 +95,9 @@ def updateOutbox(id_user):
 def viewInboxEmail(id_user,id_email):
     return EmailHandler().viewInboxEmail(id_user,id_email);
 
-@app.route('/EmailApp/user/<int:id_user>/email/inbox/<int:id_email>', methods=['GET'])
+@app.route('/EmailApp/user/<int:id_user>/email/outbox/<int:id_email>', methods=['GET'])
 def viewInboxOutbox(id_user,id_email):
-    return EmailHandler().viewInboxEmail(id_user,id_email);
+    return EmailHandler().viewOutboxEmail(id_user,id_email);
 
 
 
