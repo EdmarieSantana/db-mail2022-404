@@ -1,0 +1,472 @@
+{
+	"info": {
+		"_postman_id": "e0806390-5945-4cee-b221-035e8c7e4fe9",
+		"name": "Database Project 404",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12083150"
+	},
+	"item": [
+		{
+			"name": "Insert User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"first_name\":\"Ivan\",\r\n     \"last_name\":\"Conde\",\r\n     \"password\":\"secret\",\r\n     \"is_premium\":false,\r\n     \"email\":\"ivanof901@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/create",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Friend",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"email\":\"ivanof90@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/1/friend/add",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"1",
+						"friend",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Friend",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"email\":\"ivanof90@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/1/friend/remove",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"1",
+						"friend",
+						"remove"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Email / Create Email",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"to\":[\"juan.delpueblo@gmail.com\",\"clark.kent@gmail.com\"],\r\n     \"subject\":\"prueba de amigo join 5\",\r\n     \"raw_content\":\"...\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/13/email/send",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"13",
+						"email",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View Inbox",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"to\":\"juan.delpueblo@gmail.com\",\r\n     \"subject\":\"prueba de amigo join\",\r\n     \"raw_content\":\"...\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/1/email/inbox",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"1",
+						"email",
+						"inbox"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View Email Inbox",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"to\":\"juan.delpueblo@gmail.com\",\r\n     \"subject\":\"prueba de amigo join\",\r\n     \"raw_content\":\"...\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/1/email/inbox/27",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"1",
+						"email",
+						"inbox",
+						"27"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View Outbox",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"to\":\"juan.delpueblo@gmail.com\",\r\n     \"subject\":\"prueba de amigo join\",\r\n     \"raw_content\":\"...\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/13/email/outbox",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"13",
+						"email",
+						"outbox"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Outbox",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"id_email\":23\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/13/email/outbox/delete",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"13",
+						"email",
+						"outbox",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Inbox",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"id_email\":26\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/1/email/inbox/delete",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"1",
+						"email",
+						"inbox",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Outbox",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"id_email\":25,\r\n     \"raw_content\":\"new content\",\r\n     \"subject\":\"new subject\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/13/email/outbox/update",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"13",
+						"email",
+						"outbox",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reply Email",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"raw_content\":\"new content\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/1/email/inbox/25/reply",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"1",
+						"email",
+						"inbox",
+						"25",
+						"reply"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search inbox",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"to\":\"juan.delpueblo@gmail.com\",\r\n     \"subject\":\"prueba de amigo join\",\r\n     \"raw_content\":\"...\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/1/email/inbox/search?field=email&value=gmail",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"1",
+						"email",
+						"inbox",
+						"search"
+					],
+					"query": [
+						{
+							"key": "field",
+							"value": "email"
+						},
+						{
+							"key": "value",
+							"value": "gmail"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Outbox",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"to\":\"juan.delpueblo@gmail.com\",\r\n     \"subject\":\"prueba de amigo join\",\r\n     \"raw_content\":\"...\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/13/email/outbox/search?field=email&value=clark",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"13",
+						"email",
+						"outbox",
+						"search"
+					],
+					"query": [
+						{
+							"key": "field",
+							"value": "email"
+						},
+						{
+							"key": "value",
+							"value": "clark"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Category Email",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"category\":\"important\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_endpoint}}/EmailApp/user/1/email/23/setcategory",
+					"host": [
+						"{{server_endpoint}}"
+					],
+					"path": [
+						"EmailApp",
+						"user",
+						"1",
+						"email",
+						"23",
+						"setcategory"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
