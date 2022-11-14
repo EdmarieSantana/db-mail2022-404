@@ -11,6 +11,25 @@ class EmailDAO:
                                                                     pg_config['host'])
         self.conn = psycopg2._connect(connection_url)
 
+    #get all email in the table
+    def getAllEmails(self):
+        query = 'select * from "email" order by id_email asc;'
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            print(row)
+            result.append(row)
+        cursor.close()
+        return result
+
+    #get email by id given
+    def getEmailbyId(self, id_email):
+        query = 'select * from "email" where id_email = %s;'
+        cursor = self.conn.cursor()
+        cursor.execute(query, (id_email,))
+        return cursor.fetchone()
+
     def createEmail(self, subject, raw_content, to, id_user):
         try:
 
@@ -296,17 +315,35 @@ class EmailDAO:
         except psycopg2.errors.lookup("23505"):
             raise ValueError('The email is already taken')
 
+    def viewEmailMostRecipients(self):
+        query = "SELECT R.id_email, count(R.id_email) AS recipients" \
+                " FROM \"receive\" AS R " \
+                " group by R.id_email" \
+                " order by count(R.id_email) Desc" \
+                " LIMIT 1"
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            print(row)
+            result.append(row)
+        cursor.close()
+        return result
 
-
-
-
-
-
-
-
-
-
-
+    def viewEmailMostReplies(self):
+        query = "SELECT R.id_email_reply_to AS id_email, count(R.id_email_reply_to) AS replies" \
+                " FROM \"replies\" AS R " \
+                " group by R.id_email_reply_to" \
+                " order by count(R.id_email_reply_to) Desc" \
+                " LIMIT 1"
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            print(row)
+            result.append(row)
+        cursor.close()
+        return result
 
 
 

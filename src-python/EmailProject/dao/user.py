@@ -11,6 +11,24 @@ class UserDAO:
                                                             pg_config['host'])
         self.conn = psycopg2._connect(connection_url)
 
+    #get all user in the table
+    def getAllUsers(self):
+        query = 'select * from "user" ORDER BY id_user ASC;'
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            print(row)
+            result.append(row)
+        cursor.close()
+        return result
+
+    #get user by id given
+    def getUserbyId(self, id_user):
+        query = 'select* from "user" where id_user = %s;'
+        cursor = self.conn.cursor()
+        cursor.execute(query, (id_user,))
+        return cursor.fetchone()
     def insert(self, first_name, last_name, password, is_premium,email):
         try:
             cursor = self.conn.cursor()

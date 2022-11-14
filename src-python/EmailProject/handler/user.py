@@ -44,7 +44,35 @@ class UserHandler:
             return jsonify(User=result), 201
         except ValueError as err:
             return jsonify(str(err)), 409
+    def build_userdata_dict(self, row):
+        result = {}
+        result['id_user'] = row[0]
+        result['first_name'] = row[1]
+        result['last_name'] = row[2]
+        result['password'] = row[3]
+        result['is_premium'] = row[4]
+        result['email'] = row[5]
+        return result
 
+    #Gets all users in the table
+    def getAllUsers(self):
+        dao = UserDAO()
+        result_tuples = dao.getAllUsers()
+        result = []
+        for row in result_tuples:
+            dict = self.build_userdata_dict(row)
+            result.append(dict)
+        return jsonify(result)
+
+    #Gets user with id given
+    def getUserbyId(self, u_id):
+        dao = UserDAO()
+        result = dao.getUserbyId(u_id)
+        if not result:
+            return jsonify("Not Found"), 404
+        else:
+            dict = self.build_userdata_dict(result)
+            return jsonify(dict), 200
 
     def addFriend(self,id_user, json):
         schema = FriendSchemaEmail()

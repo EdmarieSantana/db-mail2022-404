@@ -71,7 +71,45 @@ class EmailHandler:
         result['from'] = row[5]
         return result
 
+    def build_emaildata_dict(self, row):
+        result = {}
+        result['id_email'] = row[0]
+        result['subject'] = row[1]
+        result['rawcontent'] = row[2]
+        result['date_sended'] = row[3]
+        result['is_deleted_outbpx'] = row[4]
+        result['id_user_from'] = row[5]
+        return result
+    def build_recipients_dict(self, row):
+        result = {}
+        result['id_email'] = row[0]
+        result['recipients'] = row[1]
+        return result
 
+    def build_replies_dict(self, row):
+        result = {}
+        result['id_email'] = row[0]
+        result['replies'] = row[1]
+        return result
+    # Gets all emails in the table
+    def getAllEmails(self):
+        dao = EmailDAO()
+        result_tuples = dao.getAllEmails()
+        result = []
+        for row in result_tuples:
+            dict = self.build_emaildata_dict(row)
+            result.append(dict)
+        return jsonify(result)
+
+    # Gets email with id given
+    def getEmailbyId(self, u_id):
+        dao = EmailDAO()
+        result = dao.getEmailbyId(u_id)
+        if not result:
+            return jsonify("Not Found"), 404
+        else:
+            dict = self.build_emaildata_dict(result)
+            return jsonify(dict), 200
 
     def createEmail(self,json_data,id_user):
         schema = EmailSchema()
@@ -243,7 +281,23 @@ class EmailHandler:
         except ValueError as err:
             return jsonify(str(err)), 409
 
+    def viewEmailMostRecipients(self):
+        dao = EmailDAO()
+        result_tuples = dao.viewEmailMostRecipients()
+        result = []
+        for row in result_tuples:
+            dict = self.build_recipients_dict(row)
+            result.append(dict)
+        return jsonify(result)
 
+    def viewEmailMostReplies(self):
+        dao = EmailDAO()
+        result_tuples = dao.viewEmailMostReplies()
+        result = []
+        for row in result_tuples:
+            dict = self.build_replies_dict(row)
+            result.append(dict)
+        return jsonify(result)
 
 
 
