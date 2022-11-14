@@ -50,6 +50,21 @@ def user_by_id_handler(id_user):
         return UserHandler().getUserbyId(id_user)
     else:
         return jsonify("Not Supported"), 405
+
+@app.route('/404/user/top10usersinbox', methods=['GET'])
+def top10inbox_handler():
+    if request.method == 'GET':
+        return UserHandler().viewTop10UsersWithMoreEmailsOnInbox()
+    else:
+        return jsonify("Not Supported"), 405
+
+@app.route('/404/user/top10usersoutbox', methods=['GET'])
+def top10outbox_handler():
+    if request.method == 'GET':
+        return UserHandler().viewTop10UsersWithMoreEmailsOnOutbox()
+    else:
+        return jsonify("Not Supported"), 405
+
 # END USER SERVICES
 
 # EMAIL SERVICES
@@ -135,6 +150,7 @@ def email_by_id_handler(id_email):
         return EmailHandler().getEmailbyId(id_email)
     else:
         return jsonify("Not Supported"), 405
+
 @app.route('/404/email/mostrecipients', methods=['GET'])
 def recipients_handler():
     if request.method == 'GET':

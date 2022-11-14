@@ -13,7 +13,7 @@ class EmailDAO:
 
     #get all email in the table
     def getAllEmails(self):
-        query = 'select * from "email" order by id_email asc;'
+        query = 'select * from "email" WHERE is_deleted_outbox = FALSE order by id_email asc;'
         cursor = self.conn.cursor()
         cursor.execute(query)
         result = []
@@ -25,7 +25,7 @@ class EmailDAO:
 
     #get email by id given
     def getEmailbyId(self, id_email):
-        query = 'select * from "email" where id_email = %s;'
+        query = 'select * from "email" where id_email = %s AND is_deleted_outbox = FALSE;'
         cursor = self.conn.cursor()
         cursor.execute(query, (id_email,))
         return cursor.fetchone()
@@ -318,6 +318,8 @@ class EmailDAO:
     def viewEmailMostRecipients(self):
         query = "SELECT R.id_email, count(R.id_email) AS recipients" \
                 " FROM \"receive\" AS R " \
+                " INNER JOIN \"email\" E on E.id_email = R.id_email" \
+                " WHERE E.is_deleted_outbox = FALSE" \
                 " group by R.id_email" \
                 " order by count(R.id_email) Desc" \
                 " LIMIT 1"
@@ -333,6 +335,8 @@ class EmailDAO:
     def viewEmailMostReplies(self):
         query = "SELECT R.id_email_reply_to AS id_email, count(R.id_email_reply_to) AS replies" \
                 " FROM \"replies\" AS R " \
+                " INNER JOIN \"email\" E on E.id_email = R.id_email" \
+                " WHERE E.is_deleted_outbox = FALSE" \
                 " group by R.id_email_reply_to" \
                 " order by count(R.id_email_reply_to) Desc" \
                 " LIMIT 1"

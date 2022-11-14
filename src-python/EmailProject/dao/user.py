@@ -71,6 +71,41 @@ class UserDAO:
        cursor.execute(query, (id_user_friend,id_user))
        self.conn.commit()
 
+    def viewTop10UsersWithMoreEmailsOnInbox(self):
+        query = "SELECT U.id_user, U.first_name, U.last_name, count(R.id_email) AS Inbox_Emails" \
+                " FROM \"user\" AS U " \
+                " INNER JOIN \"receive\" R on R.id_user = U.id_user" \
+                " INNER JOIN \"email\" E on E.id_email = R.id_email" \
+                " WHERE E.is_deleted_outbox = FALSE" \
+                " GROUP BY U.id_user" \
+                " order by count(R.id_email) Desc"\
+                " LIMIT 10"
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            print(row)
+            result.append(row)
+        cursor.close()
+        return result
+
+    def viewTop10UsersWithMoreEmailsOnOutbox(self):
+        query = "SELECT U.id_user, U.first_name, U.last_name, count(E.id_user_from) AS Outbox_Emails" \
+                " FROM \"user\" AS U " \
+                " INNER JOIN \"email\" E on E.id_user_from = U.id_user" \
+                " WHERE E.is_deleted_outbox = FALSE" \
+                " GROUP BY U.id_user" \
+                " order by count(E.id_user_from) Desc"\
+                " LIMIT 10"
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            print(row)
+            result.append(row)
+        cursor.close()
+        return result
+
 
 
 

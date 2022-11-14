@@ -54,6 +54,23 @@ class UserHandler:
         result['email'] = row[5]
         return result
 
+    def build_top10usersinbox_dict(self, row):
+        result = {}
+        result['id_user'] = row[0]
+        result['first_name'] = row[1]
+        result['last_name'] = row[2]
+        result['inbox_emails'] = row[3]
+        return result
+
+    def build_top10usersoutbox_dict(self, row):
+        result = {}
+        result['id_user'] = row[0]
+        result['first_name'] = row[1]
+        result['last_name'] = row[2]
+        result['outbox_emails'] = row[3]
+        return result
+
+
     #Gets all users in the table
     def getAllUsers(self):
         dao = UserDAO()
@@ -108,7 +125,21 @@ class UserHandler:
         except ValueError as err:
             return jsonify(str(err)), 400
 
+    def viewTop10UsersWithMoreEmailsOnInbox(self):
+        dao = UserDAO()
+        result_tuples = dao.viewTop10UsersWithMoreEmailsOnInbox()
+        result = []
+        for row in result_tuples:
+            dict = self.build_top10usersinbox_dict(row)
+            result.append(dict)
+        return jsonify(result)
 
-
-
+    def viewTop10UsersWithMoreEmailsOnOutbox(self):
+        dao = UserDAO()
+        result_tuples = dao.viewTop10UsersWithMoreEmailsOnOutbox()
+        result = []
+        for row in result_tuples:
+            dict = self.build_top10usersoutbox_dict(row)
+            result.append(dict)
+        return jsonify(result)
 

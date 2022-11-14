@@ -77,7 +77,7 @@ class EmailHandler:
         result['subject'] = row[1]
         result['rawcontent'] = row[2]
         result['date_sended'] = row[3]
-        result['is_deleted_outbpx'] = row[4]
+        result['is_deleted_outbox'] = row[4]
         result['id_user_from'] = row[5]
         return result
     def build_recipients_dict(self, row):
