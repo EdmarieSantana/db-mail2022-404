@@ -29,6 +29,7 @@ class UserDAO:
         cursor = self.conn.cursor()
         cursor.execute(query, (id_user,))
         return cursor.fetchone()
+
     def insert(self, first_name, last_name, password, is_premium,email):
         try:
             cursor = self.conn.cursor()
@@ -77,7 +78,7 @@ class UserDAO:
                 " INNER JOIN \"receive\" R on R.id_user = U.id_user" \
                 " INNER JOIN \"email\" E on E.id_email = R.id_email" \
                 " WHERE E.is_deleted_outbox = FALSE" \
-                " GROUP BY U.id_user" \
+                " GROUP BY U.id_user,U.first_name, U.last_name" \
                 " order by count(R.id_email) Desc"\
                 " LIMIT 10"
         cursor = self.conn.cursor()
@@ -94,7 +95,7 @@ class UserDAO:
                 " FROM \"user\" AS U " \
                 " INNER JOIN \"email\" E on E.id_user_from = U.id_user" \
                 " WHERE E.is_deleted_outbox = FALSE" \
-                " GROUP BY U.id_user" \
+                " GROUP BY U.id_user,U.first_name, U.last_name" \
                 " order by count(E.id_user_from) Desc"\
                 " LIMIT 10"
         cursor = self.conn.cursor()

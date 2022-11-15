@@ -231,34 +231,36 @@ class EmailDAO:
         cursor = self.conn.cursor()
         query = "select email.id_email,subject,date_sended," \
                 "STRING_AGG(distinct u_receiver.email,',' order by u_receiver.email ASC),raw_content,u_sender.email," \
-                "e.is_readed,u_sender.id_user " \
+                "e.is_readed,u_sender.id_user,e.require_ack " \
                 "from email " \
                 "inner join receive e on email.id_email = e.id_email " \
                 "inner join \"user\" u_receiver on u_receiver.id_user = e.id_user " \
                 "inner join \"user\" u_sender on u_sender.id_user = email.id_user_from " \
                 "where e.is_deleted is false and e.id_email = %s and e.id_user = %s" \
-                "group by email.id_email,subject,date_sended,raw_content,u_sender.email,e.is_readed,u_sender.id_user " \
+                "group by email.id_email,subject,date_sended,raw_content,u_sender.email," \
+                "e.is_readed,u_sender.id_user,e.require_ack " \
                 "order by email.id_email desc"
         cursor.execute(query, (id_email,id_user))
         email_info = cursor.fetchone()
         if email_info is None:
             raise ValueError('The email info doesn´t exits')
-        if email_info[6] is False:
+        if email_info[6] is False and email_info[8] : # If email has not been read and
+            # the email requires acknowledgment
             query = "insert into \"email\"(subject, raw_content, date_sended,id_user_from)" \
                     " values (%s, %s,current_timestamp, %s) returning id_email;"
             cursor.execute(query, ("Email read alert:"+str(email_info[0]),
                                    "The email with subject:\""+str(email_info[1])+"\" has been readed ",
                                    0))
             id_email_acknowled = cursor.fetchone()[0]
-            query = "insert into \"receive\"(id_user, id_email)" \
-                    " values (%s, %s);"
+            query = "insert into \"receive\"(id_user, id_email,require_ack)" \
+                    " values (%s, %s,false);"
             cursor.execute(query, (email_info[7], id_email_acknowled))
 
+        if email_info[6] is False:
             query = "update receive set is_readed = true where id_user=%s and id_email=%s;"
+            cursor.execute(query, (id_user, id_email))
 
-            cursor.execute(query, (id_user,id_email))
-
-            self.conn.commit()
+        self.conn.commit()
         return email_info
 
     def viewOutboxEmail(self,id_user,id_email):
