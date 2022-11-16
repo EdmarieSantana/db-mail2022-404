@@ -70,6 +70,29 @@ class UserHandler:
         result['outbox_emails'] = row[3]
         return result
 
+    def build_recipients_dict(self, row):
+        result = {}
+        result['id_email'] = row[0]
+        result['recipients'] = row[1]
+        return result
+
+    def build_replies_dict(self, row):
+        result = {}
+        result['id_email'] = row[0]
+        result['replies'] = row[1]
+        return result
+
+    def build_sentTo_dict(self,row):
+        result = {}
+        result['id_user'] = row[0]
+        result['sent'] = row[1]
+        return result
+
+    def build_receivedFrom_dict(self,row):
+        result = {}
+        result['id_user'] = row[0]
+        result['received'] = row[1]
+        return result
 
     #Gets all users in the table
     def getAllUsers(self):
@@ -143,3 +166,38 @@ class UserHandler:
             result.append(dict)
         return jsonify(result)
 
+    def viewEmailMostRecepientsOfUser(self, id_user):
+        dao = UserDAO()
+        result_tuples = dao.viewEmailMostRecepientsOfUser(id_user)
+        result = []
+        for row in result_tuples:
+            dict= self.build_recipients_dict(row)
+            result.append(dict)
+        return jsonify(result)
+
+    def viewEmailMostRepliesOfUser(self, id_user):
+        dao = UserDAO()
+        result_tuples = dao.viewEmailMostRepliesOfUser(id_user)
+        result = []
+        for row in result_tuples:
+            dict= self.build_replies_dict(row)
+            result.append(dict)
+        return jsonify(result)
+
+    def viewTop5RecipientsOfUser(self, id_user):
+        dao = UserDAO()
+        result_tuples = dao.viewTop5RecipientsOfUser(id_user)
+        result = []
+        for row in result_tuples:
+            dict= self.build_sentTo_dict(row)
+            result.append(dict)
+        return jsonify(result)
+
+    def viewTop5SendersOfUser(self, id_user):
+        dao = UserDAO()
+        result_tuples = dao.viewTop5SendersOfUser(id_user)
+        result = []
+        for row in result_tuples:
+            dict= self.build_receivedFrom_dict(row)
+            result.append(dict)
+        return jsonify(result)

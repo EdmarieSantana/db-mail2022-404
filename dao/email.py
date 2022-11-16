@@ -30,6 +30,25 @@ class EmailDAO:
         cursor.execute(query, (id_email,))
         return cursor.fetchone()
 
+    # get all categories in the table
+    def getAllEmailsCategories(self):
+        query = 'select * from "category" order by id_category asc;'
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            print(row)
+            result.append(row)
+        cursor.close()
+        return result
+
+    #get category by id given
+    def getEmailCategorybyId(self, id_category):
+        query = 'select * from "category" WHERE id_category = %s order by id_category asc'
+        cursor = self.conn.cursor()
+        cursor.execute(query, (id_category,))
+        return cursor.fetchone()
+
     def createEmail(self, subject, raw_content, to, id_user):
         try:
 
@@ -72,17 +91,22 @@ class EmailDAO:
 
     def retreiveInbox(self, id_user):
         cursor = self.conn.cursor()
-        query = "select e.id_email,subject,date_sended,e.id_user_from,u.email," \
+        query = "select e.id_email,e.subject,e.date_sended,e.id_user_from,u.email," \
                 "(friends.id_user_tagged is not null) as friendship," \
-                "STRING_AGG(distinct category.name,',' order by category.name ASC),is_readed" \
+                "STRING_AGG(distinct category.name,',' order by category.name ASC),is_readed," \
+                " email_reply_to.id_email as id_email_reply_to," \
+                " email_reply_to.subject as reply_subject" \
                 " from receive inner join email e on receive.id_email = e.id_email" \
                 " inner join \"user\" u on u.id_user = e.id_user_from" \
                 " left join tags_friends friends on receive.id_user = friends.id_user_who_tag and e.id_user_from = friends.id_user_tagged" \
-                " left join category on receive.id_email = category.id_email" \
+                " left join category on receive.id_email = category.id_email " \
+                "left join replies r on receive.id_email = r.id_email " \
+                "left join email email_reply_to on email_reply_to.id_email = r.id_email_reply_to" \
                 " where receive.id_user = %s" \
-                " and is_deleted is false" \
-                " group by receive.id_email,e.id_email,subject,date_sended,e.id_user_from,u.email," \
-                " friends.id_user_tagged,is_readed" \
+                " and receive.is_deleted is false" \
+                " group by receive.id_email,e.id_email,e.subject,e.date_sended,e.id_user_from,u.email," \
+                " friends.id_user_tagged,is_readed,email_reply_to.id_email,"\
+                "email_reply_to.subject" \
                 " order by receive.id_email desc;"
         cursor.execute(query, (id_user,))
         result = []
@@ -99,17 +123,22 @@ class EmailDAO:
         else:
             filterSection = " and u.email like %s"
 
-        query = "select e.id_email,subject,date_sended,e.id_user_from,u.email," \
+        query = "select e.id_email,e.subject,e.date_sended,e.id_user_from,u.email," \
                 "(friends.id_user_tagged is not null) as friendship," \
-                "STRING_AGG(distinct category.name,',' order by category.name ASC),is_readed" \
+                "STRING_AGG(distinct category.name,',' order by category.name ASC),is_readed," \
+                " email_reply_to.id_email as id_email_reply_to," \
+                " email_reply_to.subject as reply_subject" \
                 " from receive inner join email e on receive.id_email = e.id_email" \
                 " inner join \"user\" u on u.id_user = e.id_user_from" \
                 " left join tags_friends friends on receive.id_user = friends.id_user_who_tag and e.id_user_from = friends.id_user_tagged" \
-                " left join category on receive.id_email = category.id_email" \
+                " left join category on receive.id_email = category.id_email " \
+                "left join replies r on receive.id_email = r.id_email "\
+                "left join email email_reply_to on email_reply_to.id_email = r.id_email_reply_to"\
                 " where receive.id_user = %s" \
-                " and is_deleted is false" + filterSection + ""  \
-                " group by receive.id_email,e.id_email,subject,date_sended,e.id_user_from,u.email," \
-                " friends.id_user_tagged,is_readed" \
+                " and receive.is_deleted is false" + filterSection + ""  \
+                " group by receive.id_email,e.id_email,e.subject,e.date_sended,e.id_user_from,u.email," \
+                " friends.id_user_tagged,receive.is_readed,email_reply_to.id_email,"\
+                "email_reply_to.subject" \
                 " order by receive.id_email desc;"
         cursor.execute(query, (id_user,value,))
         result = []
@@ -140,14 +169,20 @@ class EmailDAO:
 
     def retreiveOutbox(self, id_user):
         cursor = self.conn.cursor()
-        query = "select email.id_email,subject,date_sended," \
-                "STRING_AGG(distinct u.email,',' order by u.email ASC) " \
+        query = "select email.id_email,email.subject,email.date_sended," \
+                "STRING_AGG(distinct u.email,',' order by u.email ASC), " \
+                "email_reply_to.id_email as id_email_reply_to," \
+                "email_reply_to.subject as reply_subject " \
                 "from email " \
                 "inner join receive e on email.id_email = e.id_email " \
                 "inner join \"user\" u on u.id_user = e.id_user " \
+                "left join replies r on email.id_email = r.id_email " \
+                "left join email email_reply_to on email_reply_to.id_email = r.id_email_reply_to " \
                 "where email.id_user_from = %s " \
                 "and email.is_deleted_outbox is false " \
-                "group by email.id_email,subject,date_sended " \
+                "group by email.id_email,email.subject,email.date_sended, " \
+                "email_reply_to.id_email," \
+                "email_reply_to.subject " \
                 "order by email.id_email desc"
         cursor.execute(query, (id_user,))
         result = []
@@ -162,14 +197,20 @@ class EmailDAO:
         if field == 'email':
             filterSection = " and u.email like %s"
 
-        query = "select email.id_email,subject,date_sended," \
-                "STRING_AGG(distinct u.email,',' order by u.email ASC) " \
+        query = "select email.id_email,email.subject,email.date_sended," \
+                "STRING_AGG(distinct u.email,',' order by u.email ASC), " \
+                "email_reply_to.id_email as id_email_reply_to," \
+                "email_reply_to.subject as reply_subject " \
                 "from email " \
                 "inner join receive e on email.id_email = e.id_email " \
                 "inner join \"user\" u on u.id_user = e.id_user " \
+                "left join replies r on email.id_email = r.id_email "\
+                "left join email email_reply_to on email_reply_to.id_email = r.id_email_reply_to "\
                 "where email.id_user_from = %s " \
                 "and email.is_deleted_outbox is false " + filterSection + ""  \
-                "group by email.id_email,subject,date_sended " \
+                "group by email.id_email,email.subject,email.date_sended, " \
+                "email_reply_to.id_email,"\
+                "email_reply_to.subject "\
                 "order by email.id_email desc"
         cursor.execute(query, (id_user, value,))
         result = []
@@ -318,13 +359,11 @@ class EmailDAO:
             raise ValueError('The email is already taken')
 
     def viewEmailMostRecipients(self):
-        query = "SELECT R.id_email, count(R.id_email) AS recipients" \
-                " FROM \"receive\" AS R " \
-                " INNER JOIN \"email\" E on E.id_email = R.id_email" \
-                " WHERE E.is_deleted_outbox = FALSE" \
-                " group by R.id_email" \
-                " order by count(R.id_email) Desc" \
-                " LIMIT 1"
+        query = "SELECT id_email, count(id_email) AS replies from" \
+                " \"receive\" group by id_email" \
+                " having count(id_email) =(select max(a.counting) from  " \
+                " (select id_email, count(id_email) as counting from " \
+                " \"receive\"  group by id_email) a)"
         cursor = self.conn.cursor()
         cursor.execute(query)
         result = []
@@ -335,13 +374,11 @@ class EmailDAO:
         return result
 
     def viewEmailMostReplies(self):
-        query = "SELECT R.id_email_reply_to AS id_email, count(R.id_email_reply_to) AS replies" \
-                " FROM \"replies\" AS R " \
-                " INNER JOIN \"email\" E on E.id_email = R.id_email" \
-                " WHERE E.is_deleted_outbox = FALSE" \
-                " group by R.id_email_reply_to" \
-                " order by count(R.id_email_reply_to) Desc" \
-                " LIMIT 1"
+        query = "SELECT id_email_reply_to AS id_email, count(id_email) AS replies from"\
+                " \"replies\" group by id_email_reply_to"\
+                " having count(id_email) =(select max(a.counting) from  " \
+                " (select id_email_reply_to, count(id_email) as counting from "\
+                " \"replies\"  group by id_email_reply_to) a)"
         cursor = self.conn.cursor()
         cursor.execute(query)
         result = []
@@ -350,7 +387,6 @@ class EmailDAO:
             result.append(row)
         cursor.close()
         return result
-
 
 
 

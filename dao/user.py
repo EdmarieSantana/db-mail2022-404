@@ -107,6 +107,90 @@ class UserDAO:
         cursor.close()
         return result
 
+    def viewEmailMostRecepientsOfUser(self, id_user):
+        query = "select R.id_email, count(R.id_email) as recipients " \
+                "from receive R " \
+                "inner join email E on R.id_email = E.id_email " \
+                "where E.id_user_from = %s " \
+                "group by R.id_email " \
+                "having count(R.id_email) = "\
+                "( "\
+                    "select max(cR.recipients) from "\
+                        "(select  count(R.id_email) as recipients " \
+                        "from receive R " \
+                        "inner join email E on R.id_email = E.id_email " \
+                        "where E.id_user_from = %s " \
+                        "group by R.id_email ) as cR" \
+                ")"\
+
+        cursor = self.conn.cursor()
+        cursor.execute(query, (id_user, id_user))
+        result = []
+        for row in cursor:
+            result.append(row)
+        cursor.close()
+        return result
+
+    def viewEmailMostRepliesOfUser(self, id_user):
+        query = "with replyCount " \
+                "as (" \
+                "select R.id_email_reply_to as id_email, count(R.id_email_reply_to) as replies " \
+                "from replies R inner join email E on R.id_email = E.id_email " \
+                "group by R.id_email_reply_to " \
+                "order by count(R.id_email_reply_to) desc " \
+                ") " \
+                "select RC.id_email, RC.replies " \
+                "from replyCount as RC inner join email E on RC.id_email = E.id_email " \
+                "where id_user_from = %s " \
+                "AND RC.replies =  "\
+                "( "\
+                    "select max(cR.replies) from " \
+                        "(select RC.id_email, RC.replies " \
+                        "from replyCount as RC inner join email E on RC.id_email = E.id_email " \
+                        "where id_user_from = %s ) as cR" \
+                ") "
+
+        cursor = self.conn.cursor()
+        cursor.execute(query, (id_user, id_user))
+        result = []
+        for row in cursor:
+            result.append(row)
+        cursor.close()
+        return result
+
+    def viewTop5RecipientsOfUser(self, id_user):
+        query = "select receive.id_user, count(receive.id_user) as sent " \
+                "from receive " \
+                "inner join email E on receive.id_email = E.id_email " \
+                "where id_user_from = %s " \
+                "group by receive.id_user " \
+                "order by count(receive.id_user) desc " \
+                "limit 5 "
+
+        cursor = self.conn.cursor()
+        cursor.execute(query, (id_user,))
+        result = []
+        for row in cursor:
+            result.append(row)
+        cursor.close()
+        return result
+
+    def viewTop5SendersOfUser(self, id_user):
+        query = "select id_user_from, count(id_user_from) as recieved " \
+                "from receive R " \
+                "inner join email E on R.id_email = E.id_email " \
+                "where R.id_user = %s " \
+                "group by id_user_from " \
+                "order by count(E.id_user_from) desc " \
+                "limit 5 "
+
+        cursor = self.conn.cursor()
+        cursor.execute(query, (id_user,))
+        result = []
+        for row in cursor:
+            result.append(row)
+        cursor.close()
+        return result
 
 
 

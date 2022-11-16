@@ -50,6 +50,8 @@ class EmailHandler:
         else:
             result['categories'] = row[6].split(",");
         result['is_readed'] = row[7]
+        result['id_reply_to'] = row[8]
+        result['subject_reply_to'] = row[9]
 
         return result
 
@@ -58,7 +60,9 @@ class EmailHandler:
         result['id_email'] = row[0]
         result['subject'] = row[1]
         result['date_sended'] = row[2]
-        result['to'] = row[3].split(",");
+        result['to'] = row[3].split(",")
+        result['id_reply_to'] = row[4]
+        result['subject_reply_to'] = row[5]
         return result
 
     def build_email_view_dict(self, row):
@@ -80,6 +84,7 @@ class EmailHandler:
         result['is_deleted_outbox'] = row[4]
         result['id_user_from'] = row[5]
         return result
+
     def build_recipients_dict(self, row):
         result = {}
         result['id_email'] = row[0]
@@ -91,6 +96,15 @@ class EmailHandler:
         result['id_email'] = row[0]
         result['replies'] = row[1]
         return result
+
+    def build_emailcategorydata_dict(self, row):
+        result = {}
+        result['id_category'] = row[0]
+        result['id_email'] = row[1]
+        result['id_user'] = row[2]
+        result['name'] = row[3]
+        return result
+
     # Gets all emails in the table
     def getAllEmails(self):
         dao = EmailDAO()
@@ -102,13 +116,33 @@ class EmailHandler:
         return jsonify(result)
 
     # Gets email with id given
-    def getEmailbyId(self, u_id):
+    def getEmailbyId(self, id_email):
         dao = EmailDAO()
-        result = dao.getEmailbyId(u_id)
+        result = dao.getEmailbyId(id_email)
         if not result:
             return jsonify("Not Found"), 404
         else:
             dict = self.build_emaildata_dict(result)
+            return jsonify(dict), 200
+
+    # Gets all emails in the table
+    def getAllEmailsCategories(self):
+        dao = EmailDAO()
+        result_tuples = dao.getAllEmailsCategories()
+        result = []
+        for row in result_tuples:
+            dict = self.build_emailcategorydata_dict(row)
+            result.append(dict)
+        return jsonify(result)
+
+    # Gets email with id given
+    def getEmailCategorybyId(self, id_category):
+        dao = EmailDAO()
+        result = dao.getEmailCategorybyId(id_category)
+        if not result:
+            return jsonify("Not Found"), 404
+        else:
+            dict = self.build_emailcategorydata_dict(result)
             return jsonify(dict), 200
 
     def createEmail(self,json_data,id_user):
@@ -179,7 +213,7 @@ class EmailHandler:
                     result_list.append(result)
                 return jsonify(Inbox=result_list)
         else:
-            return jsonify("Query param 'field' expects: 'category' or 'to'"), 400
+            return jsonify("Query param 'field' expects: 'email'"), 400
 
 
 
@@ -298,8 +332,6 @@ class EmailHandler:
             dict = self.build_replies_dict(row)
             result.append(dict)
         return jsonify(result)
-
-
 
 
 

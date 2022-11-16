@@ -65,6 +65,33 @@ def top10outbox_handler():
     else:
         return jsonify("Not Supported"), 405
 
+@app.route('/404/user/<int:id_user>/mostrecipients', methods=['GET'])
+def user_recipients_handler(id_user):
+    if request.method == 'GET':
+        return UserHandler().viewEmailMostRecepientsOfUser(id_user)
+    else:
+        return jsonify("Not Supported"), 405
+
+@app.route('/404/user/<int:id_user>/mostreplies', methods=['GET'])
+def user_replies_handler(id_user):
+    if request.method == 'GET':
+        return UserHandler().viewEmailMostRepliesOfUser(id_user)
+    else:
+        return jsonify("Not Supported"), 405
+
+@app.route('/404/user/<int:id_user>/top5recipients', methods=['GET'])
+def user_top5recipients_handler(id_user):
+    if request.method == 'GET':
+        return UserHandler().viewTop5RecipientsOfUser(id_user)
+    else:
+        return jsonify("Not Supported"), 405
+
+@app.route('/404/user/<int:id_user>/top5senders', methods=['GET'])
+def user_top5senders_handler(id_user):
+    if request.method == 'GET':
+        return UserHandler().viewTop5SendersOfUser(id_user)
+    else:
+        return jsonify("Not Supported"), 405
 # END USER SERVICES
 
 # EMAIL SERVICES
@@ -148,6 +175,21 @@ def emails_handler():
 def email_by_id_handler(id_email):
     if request.method == 'GET':
         return EmailHandler().getEmailbyId(id_email)
+    else:
+        return jsonify("Not Supported"), 405
+
+@app.route('/404/email/getallemailscategories', methods=['GET'])
+def emails_categories_handler():
+    if request.method == 'GET':
+        return EmailHandler().getAllEmailsCategories()
+    else:
+        return jsonify("Not Supported"), 405
+
+
+@app.route('/404/email/category/<int:id_category>', methods=['GET'])
+def email_categories_by_id_handler(id_category):
+    if request.method == 'GET':
+        return EmailHandler().getEmailCategorybyId(id_category)
     else:
         return jsonify("Not Supported"), 405
 
