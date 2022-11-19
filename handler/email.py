@@ -24,8 +24,10 @@ class EmailUpdateSchema(Schema):
     raw_content = fields.String(required=True)
     id_email = fields.Int(required=True)
 
-
-
+class EmailCategoryUpdateSchema(Schema):
+    id_email = fields.Int(required=True)
+    id_user = fields.Int(required=True)
+    name = fields.String(required=True)
 
 class EmailHandler:
 
@@ -188,7 +190,7 @@ class EmailHandler:
                     result_list.append(result)
                 return jsonify(Inbox=result_list)
         else:
-            return jsonify("Query param 'field' expects: 'category' or 'to'"), 400
+            return jsonify("Query param 'field' expects: 'category' or 'email'"), 400
 
     def retreiveOutbox(self, id_user):
         dao = EmailDAO()
@@ -215,10 +217,6 @@ class EmailHandler:
         else:
             return jsonify("Query param 'field' expects: 'email'"), 400
 
-
-
-
-
     def setCategoryEmail(self,id_user,id_email,json):
         schema = EmailCategorySchema()
         try:
@@ -226,8 +224,40 @@ class EmailHandler:
         except ValidationError as err:
             return jsonify(err.messages), 400
         dao = EmailDAO()
-        result = dao.setCategoryEmail(id_user,id_email,json['category'])
-        return jsonify(Categories=result)
+        try:
+            result = dao.setCategoryEmail(id_user,id_email,json['category'])
+            return jsonify(Categories=result)
+        except ValueError as err:
+            return jsonify(str(err)), 409
+
+    def updateCategory(self, id_category, json):
+        dao = EmailDAO()
+        if not dao.getEmailCategorybyId(id_category):
+            return jsonify("Category Not Found"), 404
+        else:
+            schema = EmailCategoryUpdateSchema()
+            try:
+                result = schema.load(json)
+            except ValidationError as err:
+                return jsonify(err.messages), 400
+
+            id_email = json['id_email']
+            id_user = json['id_user']
+            name = json['name']
+            try:
+                dao.updateCategory(id_category, id_email, id_user, name)
+                result = self.build_emailcategorydata_dict((id_category, id_email, id_user, name))
+                return jsonify(Category=result), 200
+            except ValueError as err:
+                return jsonify(str(err)), 409
+
+    def deleteCategory(self, id_category):
+        dao = EmailDAO()
+        if not dao.getEmailCategorybyId(id_category):
+            return jsonify("Category Not Found"), 404
+        else:
+            dao.deleteCategory(id_category)
+            return jsonify("Category Deleted"), 200
 
     def deleteInbox(self, id_user, email_data):
         schema = EmailDeleteSchema()
@@ -269,7 +299,6 @@ class EmailHandler:
         dao = EmailDAO()
         try:
             email_info = dao.updateOutbox(id_user, id_email,subject,raw_content)
-            print("Email updated",email_info)
             email_info_response = self.build_email_view_dict(email_info)
             return jsonify(Email=email_info_response), 200
         except ValueError as err:

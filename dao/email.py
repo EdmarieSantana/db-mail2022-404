@@ -32,7 +32,7 @@ class EmailDAO:
 
     # get all categories in the table
     def getAllEmailsCategories(self):
-        query = 'select * from "category" order by id_category asc;'
+        query = 'select * from "category" WHERE is_deleted = FALSE order by id_category asc;'
         cursor = self.conn.cursor()
         cursor.execute(query)
         result = []
@@ -44,7 +44,7 @@ class EmailDAO:
 
     #get category by id given
     def getEmailCategorybyId(self, id_category):
-        query = 'select * from "category" WHERE id_category = %s order by id_category asc'
+        query = 'select * from "category" WHERE id_category = %s AND is_deleted = FALSE order by id_category asc'
         cursor = self.conn.cursor()
         cursor.execute(query, (id_category,))
         return cursor.fetchone()
@@ -99,7 +99,7 @@ class EmailDAO:
                 " from receive inner join email e on receive.id_email = e.id_email" \
                 " inner join \"user\" u on u.id_user = e.id_user_from" \
                 " left join tags_friends friends on receive.id_user = friends.id_user_who_tag and e.id_user_from = friends.id_user_tagged" \
-                " left join category on receive.id_email = category.id_email " \
+                " left join category on (receive.id_email = category.id_email and category.is_deleted = false) " \
                 "left join replies r on receive.id_email = r.id_email " \
                 "left join email email_reply_to on email_reply_to.id_email = r.id_email_reply_to" \
                 " where receive.id_user = %s" \
@@ -131,7 +131,7 @@ class EmailDAO:
                 " from receive inner join email e on receive.id_email = e.id_email" \
                 " inner join \"user\" u on u.id_user = e.id_user_from" \
                 " left join tags_friends friends on receive.id_user = friends.id_user_who_tag and e.id_user_from = friends.id_user_tagged" \
-                " left join category on receive.id_email = category.id_email " \
+                " left join category on receive.id_email = category.id_email and category.is_deleted = false " \
                 "left join replies r on receive.id_email = r.id_email "\
                 "left join email email_reply_to on email_reply_to.id_email = r.id_email_reply_to"\
                 " where receive.id_user = %s" \
@@ -166,6 +166,20 @@ class EmailDAO:
         for row in cursor:
             result.append(row)
         return result;
+
+    def updateCategory (self, id_category, id_email, id_user, name):
+        cursor = self.conn.cursor()
+        query = "update category set id_email=%s, id_user=%s, name=%s where id_category=%s"
+        cursor.execute(query, (id_email, id_user, name, id_category))
+        self.conn.commit()
+        return id_category
+
+    def deleteCategory (self, id_category):
+        cursor  = self.conn.cursor()
+        query = "update category set is_deleted = True where id_category=%s"
+        cursor.execute(query, (id_category,))
+        self.conn.commit()
+        return id_category
 
     def retreiveOutbox(self, id_user):
         cursor = self.conn.cursor()
@@ -252,7 +266,7 @@ class EmailDAO:
             raise ValueError('The user is not premium')
         #we include id_user in where clause to ensure that the requested operation over the email is
         #made by the owner (the premium user).
-        query = "update email set subject = %s, raw_content = %s where id_email = %s and id_user_from = %s;"
+        query = "update email set subject = %s, raw_content = %s where id_email = %s and id_user_from = %s and is_deleted_outbox = false;"
         cursor.execute(query, (subject,raw_content,id_email,id_user))
         self.conn.commit()
 
@@ -261,11 +275,14 @@ class EmailDAO:
                 "from email " \
                 "inner join receive e on email.id_email = e.id_email " \
                 "inner join \"user\" u on u.id_user = e.id_user " \
-                "where email.id_email = %s " \
+                "where email.id_email = %s and is_deleted_outbox = false " \
                 "group by email.id_email,subject,date_sended,raw_content,u.email " \
                 "order by email.id_email desc"
         cursor.execute(query, (id_email,))
         email_info = cursor.fetchone()
+        if email_info is None:
+            raise ValueError('The email doesn´t exists')
+
         return email_info
 
     def viewInboxEmail(self,id_user,id_email):
@@ -325,10 +342,11 @@ class EmailDAO:
     def replyEmail(self, id_user, id_email,subject,raw_content):
         try:
             cursor = self.conn.cursor()
-            query = "select e.id_user_from,e.subject,u.email from \"email\" e " \
+            query = "select e.id_user_from,e.subject,u.email from receive r inner join " \
+                    "\"email\" e on r.id_email = e.id_email " \
                     "inner join \"user\" u on e.id_user_from = u.id_user " \
-                    "where e.id_email = %s;"
-            cursor.execute(query, (id_email,))
+                    "where r.id_email = %s and r.id_user = %s and r.is_deleted = false ;"
+            cursor.execute(query, (id_email,id_user))
             email_to_reply = cursor.fetchone()
             if email_to_reply is None:
                 raise ValueError("The email to reply doesn´t exits")

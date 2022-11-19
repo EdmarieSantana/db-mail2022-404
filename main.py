@@ -44,10 +44,14 @@ def users_handler():
         return jsonify("Not Supported"), 405
 
 
-@app.route('/404/user/<int:id_user>', methods=['GET'])
+@app.route('/404/user/<int:id_user>', methods=['GET', 'PUT', 'DELETE'])
 def user_by_id_handler(id_user):
     if request.method == 'GET':
         return UserHandler().getUserbyId(id_user)
+    elif request.method == 'PUT':
+        return UserHandler().updateUser(id_user, request.json)
+    elif request.method == 'DELETE':
+        return UserHandler() .deleteUser(id_user)
     else:
         return jsonify("Not Supported"), 405
 
@@ -186,10 +190,14 @@ def emails_categories_handler():
         return jsonify("Not Supported"), 405
 
 
-@app.route('/404/email/category/<int:id_category>', methods=['GET'])
+@app.route('/404/email/category/<int:id_category>', methods=['GET', 'PUT', 'DELETE'])
 def email_categories_by_id_handler(id_category):
     if request.method == 'GET':
         return EmailHandler().getEmailCategorybyId(id_category)
+    elif request.method == 'PUT':
+        return EmailHandler().updateCategory(id_category, request.json)
+    elif request.method == 'DELETE':
+        return EmailHandler().deleteCategory(id_category)
     else:
         return jsonify("Not Supported"), 405
 

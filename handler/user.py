@@ -114,6 +114,37 @@ class UserHandler:
             dict = self.build_userdata_dict(result)
             return jsonify(dict), 200
 
+    def updateUser(self, id_user, json):
+        dao = UserDAO()
+        if not dao.getUserbyId(id_user):
+            return jsonify("User Not Found"), 404
+        else:
+            schema = UserSchema()
+            try:
+                result = schema.load(json)
+            except ValidationError as err:
+                return jsonify(err.messages), 400
+
+            first_name = json['first_name']
+            last_name = json['last_name']
+            password = json['password']
+            is_premium = json['is_premium']
+            email = json['email']
+            try:
+                dao.updateUser(id_user, first_name, last_name, password, is_premium, email)
+                result = self.build_userdata_dict((id_user, first_name, last_name, password, is_premium, email ))
+                return jsonify(User=result), 200
+            except ValueError as err:
+                return jsonify(str(err)), 409
+
+    def deleteUser(self, id_user):
+        dao = UserDAO()
+        if not dao.getUserbyId(id_user):
+            return jsonify("User Not Found"), 404
+        else:
+            dao.deleteUser(id_user)
+            return jsonify("User Deleted"), 200
+
     def addFriend(self,id_user, json):
         schema = FriendSchemaEmail()
         try:
