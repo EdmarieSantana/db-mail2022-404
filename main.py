@@ -17,6 +17,13 @@ def greeting():
 
 
 # USER SERVICES
+
+@app.route('/404/user/login', methods=['POST'])
+def login():
+    print("REQUEST: ", request.json)
+    user_data = request.json
+    return UserHandler().loginUser(user_data);
+
 @app.route('/404/user/create', methods=['POST'])
 def insertNewUser():
     print("REQUEST: ", request.json)
@@ -113,9 +120,16 @@ def retreiveInbox(id_user):
 @app.route('/404/user/<int:id_user>/email/inbox/search', methods=['GET'])
 def searchInbox(id_user):
     args = request.args;
-    field = args.get("field", default=None, type=str)
-    value = args.get("value", default=None, type=str)
-    return EmailHandler().searchInbox(id_user,field,value);
+    email = args.get("email", default=None, type=str)
+    category = args.get("category", default=None, type=str)
+    return EmailHandler().searchInbox(id_user,email,category);
+
+@app.route('/404/user/<int:id_user>/email/categorylist', methods=['GET'])
+def retreiveCategoryList(id_user):
+    return EmailHandler().retreiveCategoryList(id_user);
+
+
+
 
 
 @app.route('/404/user/<int:id_user>/email/<int:id_email>/setcategory', methods=['POST'])

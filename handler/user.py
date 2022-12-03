@@ -25,6 +25,18 @@ class UserHandler:
         result['email'] = row[4]
         return result
 
+
+    def loginUser(self,json):
+        username = json['username']
+        password = json['password']
+        dao = UserDAO()
+        try:
+            user_info = dao.login(username,password)
+            result = self.build_user_dict(user_info)
+            return jsonify(User=result), 200
+        except ValueError as err:
+            return jsonify(str(err)), 409
+
     def insertUser(self,json):
         schema = UserSchema()
         try:

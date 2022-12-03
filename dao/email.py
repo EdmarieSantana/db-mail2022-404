@@ -95,7 +95,7 @@ class EmailDAO:
                 "(friends.id_user_tagged is not null) as friendship," \
                 "STRING_AGG(distinct category.name,',' order by category.name ASC),is_readed," \
                 " email_reply_to.id_email as id_email_reply_to," \
-                " email_reply_to.subject as reply_subject" \
+                " email_reply_to.subject as reply_subject, u.first_name || ' ' || u.last_name" \
                 " from receive inner join email e on receive.id_email = e.id_email" \
                 " inner join \"user\" u on u.id_user = e.id_user_from" \
                 " left join tags_friends friends on receive.id_user = friends.id_user_who_tag and e.id_user_from = friends.id_user_tagged" \
@@ -106,7 +106,7 @@ class EmailDAO:
                 " and receive.is_deleted is false" \
                 " group by receive.id_email,e.id_email,e.subject,e.date_sended,e.id_user_from,u.email," \
                 " friends.id_user_tagged,is_readed,email_reply_to.id_email,"\
-                "email_reply_to.subject" \
+                "email_reply_to.subject,u.first_name,u.last_name" \
                 " order by receive.id_email desc;"
         cursor.execute(query, (id_user,))
         result = []
@@ -114,20 +114,33 @@ class EmailDAO:
             result.append(row)
         return result;
 
-    def searchInbox(self,id_user,field,value):
+    def retreiveCategoryList(self, id_user):
         cursor = self.conn.cursor()
+        query = "select distinct category.name from category where id_user = %s order by category.name ASC;"
+        cursor.execute(query, (id_user,))
+        result = []
+        for row in cursor:
+            result.append(row)
+        return result;
 
-        filterSection = ""
-        if field == 'category':
-            filterSection = " and category.name like %s"
-        else:
-            filterSection = " and u.email like %s"
+
+    def searchInbox(self,id_user,email,category):
+        cursor = self.conn.cursor()
+        filterSection = " and u.email like %s"
+        if category is not None:
+            filterSection = filterSection + " and category.name like %s "
+
+       # filterSection = ""
+       # if field == 'category':
+
+       # else:
+       ##     filterSection += " and u.email like %s"
 
         query = "select e.id_email,e.subject,e.date_sended,e.id_user_from,u.email," \
                 "(friends.id_user_tagged is not null) as friendship," \
                 "STRING_AGG(distinct category.name,',' order by category.name ASC),is_readed," \
                 " email_reply_to.id_email as id_email_reply_to," \
-                " email_reply_to.subject as reply_subject" \
+                " email_reply_to.subject as reply_subject,u.first_name || ' ' || u.last_name" \
                 " from receive inner join email e on receive.id_email = e.id_email" \
                 " inner join \"user\" u on u.id_user = e.id_user_from" \
                 " left join tags_friends friends on receive.id_user = friends.id_user_who_tag and e.id_user_from = friends.id_user_tagged" \
@@ -138,9 +151,13 @@ class EmailDAO:
                 " and receive.is_deleted is false" + filterSection + ""  \
                 " group by receive.id_email,e.id_email,e.subject,e.date_sended,e.id_user_from,u.email," \
                 " friends.id_user_tagged,receive.is_readed,email_reply_to.id_email,"\
-                "email_reply_to.subject" \
+                "email_reply_to.subject,u.first_name,u.last_name" \
                 " order by receive.id_email desc;"
-        cursor.execute(query, (id_user,value,))
+        if category is None:
+            cursor.execute(query, (id_user,email,))
+        if category is not None:
+            cursor.execute(query, (id_user,email,category,))
+
         result = []
         for row in cursor:
             result.append(row)

@@ -29,6 +29,17 @@ class UserDAO:
         cursor = self.conn.cursor()
         cursor.execute(query, (id_user,))
         return cursor.fetchone()
+    def login(self,username,password):
+        query = 'select id_user,first_name,last_name,is_premium,email ' \
+                'from "user" WHERE email = %s and password = %s '
+        cursor = self.conn.cursor()
+        cursor.execute(query,(username,password))
+        user_info = cursor.fetchone()
+        cursor.close()
+        if user_info is None:
+            raise ValueError('Invalid credentials')
+
+        return user_info
 
     def insert(self, first_name, last_name, password, is_premium,email):
         try:

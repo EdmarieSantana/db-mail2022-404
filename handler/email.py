@@ -54,6 +54,7 @@ class EmailHandler:
         result['is_readed'] = row[7]
         result['id_reply_to'] = row[8]
         result['subject_reply_to'] = row[9]
+        result['full_name'] = row[10]
 
         return result
 
@@ -177,20 +178,40 @@ class EmailHandler:
             result_list.append(result)
         return jsonify(Inbox=result_list)
 
-    def searchInbox(self, id_user,field,value):
-        if field is not None and (field == 'category' or field == 'email' ):
-                if value is None:
-                    return jsonify("Query param 'value' expected"), 400
-                value = "%"+value+"%"
-                dao = EmailDAO()
-                result_dao = dao.searchInbox(id_user,field,value)
-                result_list = []
-                for row in result_dao:
-                    result = self.build_inbox_dict(row)
-                    result_list.append(result)
-                return jsonify(Inbox=result_list)
-        else:
-            return jsonify("Query param 'field' expects: 'category' or 'email'"), 400
+    def retreiveCategoryList(self, id_user):
+        dao = EmailDAO()
+        result_dao = dao.retreiveCategoryList(id_user)
+        result_list = []
+        for row in result_dao:
+            result_list.append(row)
+        return jsonify(Category=result_list)
+
+    def searchInbox(self, id_user,email,category):
+        if email is None:
+            email = "";
+        email = "%" + email + "%"
+        if category is not None:
+            category = "%" + category + "%"
+        dao = EmailDAO()
+        result_dao = dao.searchInbox(id_user, email, category)
+        result_list = []
+        for row in result_dao:
+            result = self.build_inbox_dict(row)
+            result_list.append(result)
+        return jsonify(Inbox=result_list)
+        #if field is not None and (field == 'category' or field == 'email' ):
+        #       if value is None:
+        #           return jsonify("Query param 'value' expected"), 400
+        #       value = "%"+value+"%"
+        #       dao = EmailDAO()
+        #       result_dao = dao.searchInbox(id_user,field,value)
+        #       result_list = []
+        #       for row in result_dao:
+        #           result = self.build_inbox_dict(row)
+        #           result_list.append(result)
+        #       return jsonify(Inbox=result_list)
+        #else:
+        #    return jsonify("Query param 'field' expects: 'category' or 'email'"), 400
 
     def retreiveOutbox(self, id_user):
         dao = EmailDAO()
