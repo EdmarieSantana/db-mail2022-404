@@ -76,6 +76,8 @@ class EmailHandler:
         result['to'] = row[3].split(",")
         result['raw_content'] = row[4]
         result['from'] = row[5]
+        if len(row) == 10:
+            result['name'] = row[9];
         return result
 
     def build_emaildata_dict(self, row):
@@ -234,7 +236,7 @@ class EmailHandler:
                 for row in result_dao:
                     result = self.build_outbox_dict(row)
                     result_list.append(result)
-                return jsonify(Inbox=result_list)
+                return jsonify(Outbox=result_list)
         else:
             return jsonify("Query param 'field' expects: 'email'"), 400
 

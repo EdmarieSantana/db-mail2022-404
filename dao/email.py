@@ -91,7 +91,7 @@ class EmailDAO:
 
     def retreiveInbox(self, id_user):
         cursor = self.conn.cursor()
-        query = "select e.id_email,e.subject,e.date_sended,e.id_user_from,u.email," \
+        query = "select e.id_email,e.subject,format_date(e.date_sended),e.id_user_from,u.email," \
                 "(friends.id_user_tagged is not null) as friendship," \
                 "STRING_AGG(distinct category.name,',' order by category.name ASC),is_readed," \
                 " email_reply_to.id_email as id_email_reply_to," \
@@ -136,7 +136,7 @@ class EmailDAO:
        # else:
        ##     filterSection += " and u.email like %s"
 
-        query = "select e.id_email,e.subject,e.date_sended,e.id_user_from,u.email," \
+        query = "select e.id_email,e.subject,format_date(e.date_sended),e.id_user_from,u.email," \
                 "(friends.id_user_tagged is not null) as friendship," \
                 "STRING_AGG(distinct category.name,',' order by category.name ASC),is_readed," \
                 " email_reply_to.id_email as id_email_reply_to," \
@@ -200,7 +200,7 @@ class EmailDAO:
 
     def retreiveOutbox(self, id_user):
         cursor = self.conn.cursor()
-        query = "select email.id_email,email.subject,email.date_sended," \
+        query = "select email.id_email,email.subject,format_date(email.date_sended)," \
                 "STRING_AGG(distinct u.email,',' order by u.email ASC), " \
                 "email_reply_to.id_email as id_email_reply_to," \
                 "email_reply_to.subject as reply_subject " \
@@ -228,7 +228,7 @@ class EmailDAO:
         if field == 'email':
             filterSection = " and u.email like %s"
 
-        query = "select email.id_email,email.subject,email.date_sended," \
+        query = "select email.id_email,email.subject,format_date(email.date_sended)," \
                 "STRING_AGG(distinct u.email,',' order by u.email ASC), " \
                 "email_reply_to.id_email as id_email_reply_to," \
                 "email_reply_to.subject as reply_subject " \
@@ -287,7 +287,7 @@ class EmailDAO:
         cursor.execute(query, (subject,raw_content,id_email,id_user))
         self.conn.commit()
 
-        query = "select email.id_email,subject,date_sended," \
+        query = "select email.id_email,subject,format_date(date_sended)," \
                 "STRING_AGG(distinct u.email,',' order by u.email ASC),raw_content,u.email " \
                 "from email " \
                 "inner join receive e on email.id_email = e.id_email " \
@@ -304,16 +304,16 @@ class EmailDAO:
 
     def viewInboxEmail(self,id_user,id_email):
         cursor = self.conn.cursor()
-        query = "select email.id_email,subject,date_sended," \
+        query = "select email.id_email,subject,format_date(date_sended)," \
                 "STRING_AGG(distinct u_receiver.email,',' order by u_receiver.email ASC),raw_content,u_sender.email," \
-                "e.is_readed,u_sender.id_user,e.require_ack " \
+                "e.is_readed,u_sender.id_user,e.require_ack, u_sender.first_name || ' ' || u_sender.last_name " \
                 "from email " \
                 "inner join receive e on email.id_email = e.id_email " \
                 "inner join \"user\" u_receiver on u_receiver.id_user = e.id_user " \
                 "inner join \"user\" u_sender on u_sender.id_user = email.id_user_from " \
                 "where e.is_deleted is false and e.id_email = %s and e.id_user = %s" \
                 "group by email.id_email,subject,date_sended,raw_content,u_sender.email," \
-                "e.is_readed,u_sender.id_user,e.require_ack " \
+                "e.is_readed,u_sender.id_user,e.require_ack,u_sender.first_name,u_sender.last_name " \
                 "order by email.id_email desc"
         cursor.execute(query, (id_email,id_user))
         email_info = cursor.fetchone()
@@ -340,14 +340,16 @@ class EmailDAO:
 
     def viewOutboxEmail(self,id_user,id_email):
         cursor = self.conn.cursor()
-        query = "select email.id_email,subject,date_sended," \
-                "STRING_AGG(distinct u_receiver.email,',' order by u_receiver.email ASC),raw_content,u_sender.email " \
+        query = "select email.id_email,subject,format_date(date_sended)," \
+                "STRING_AGG(distinct ( u_receiver.first_name || ' ' || u_receiver.last_name || '&lt;' || u_receiver.email || '&gt;')   ," \
+                "    ',' order by (u_receiver.first_name || ' ' || u_receiver.last_name || '&lt;' || u_receiver.email || '&gt;')  ASC),raw_content,u_sender.email " \
                 "from email " \
                 "inner join receive e on email.id_email = e.id_email " \
                 "inner join \"user\" u_receiver on u_receiver.id_user = e.id_user " \
                 "inner join \"user\" u_sender on u_sender.id_user = email.id_user_from " \
                 "where email.is_deleted_outbox is false and email.id_email = %s and email.id_user_from = %s" \
-                "group by email.id_email,subject,date_sended,raw_content,u_sender.email,e.is_readed,u_sender.id_user " \
+                "group by email.id_email,subject,date_sended,raw_content,u_sender.email,e.is_readed," \
+                "u_sender.id_user,u_sender.first_name,u_sender.last_name " \
                 "order by email.id_email desc"
         cursor.execute(query, (id_email,id_user))
         email_info = cursor.fetchone()

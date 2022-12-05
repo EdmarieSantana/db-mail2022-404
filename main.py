@@ -135,6 +135,8 @@ def retreiveCategoryList(id_user):
 @app.route('/404/user/<int:id_user>/email/<int:id_email>/setcategory', methods=['POST'])
 def setCategory(id_user,id_email):
     json = request.json
+    print("REQUEST: ", request.json)
+
     return EmailHandler().setCategoryEmail(id_user,id_email,json);
 
 
