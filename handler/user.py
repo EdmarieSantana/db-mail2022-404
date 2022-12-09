@@ -97,13 +97,17 @@ class UserHandler:
     def build_sentTo_dict(self,row):
         result = {}
         result['id_user'] = row[0]
-        result['sent'] = row[1]
+        result['first_name'] = row[1]
+        result['last_name'] = row[2]
+        result['sent'] = row[3]
         return result
 
     def build_receivedFrom_dict(self,row):
         result = {}
         result['id_user'] = row[0]
-        result['received'] = row[1]
+        result['first_name'] = row[1]
+        result['last_name'] = row[2]
+        result['received'] = row[3]
         return result
 
     #Gets all users in the table

@@ -187,11 +187,12 @@ class UserDAO:
         return result
 
     def viewTop5RecipientsOfUser(self, id_user):
-        query = "select receive.id_user, count(receive.id_user) as sent " \
+        query = "select receive.id_user, U.first_name, U.last_name, count(receive.id_user) as sent " \
                 "from receive " \
                 "inner join email E on receive.id_email = E.id_email " \
+                "inner join \"user\" U on receive.id_user = U.id_user " \
                 "where E.id_user_from = %s AND E.is_deleted_outbox = FALSE " \
-                "group by receive.id_user " \
+                "group by receive.id_user, U.first_name, U.last_name " \
                 "order by count(receive.id_user) desc " \
                 "limit 5 "
 
@@ -204,11 +205,12 @@ class UserDAO:
         return result
 
     def viewTop5SendersOfUser(self, id_user):
-        query = "select id_user_from, count(id_user_from) as recieved " \
+        query = "select id_user_from, U.first_name, U.last_name, count(id_user_from) as received " \
                 "from receive R " \
                 "inner join email E on R.id_email = E.id_email " \
+                "inner join \"user\" U on E.id_user_from = U.id_user " \
                 "where R.id_user = %s AND E.is_deleted_outbox = FALSE " \
-                "group by id_user_from " \
+                "group by id_user_from, U.first_name, U.last_name  " \
                 "order by count(E.id_user_from) desc " \
                 "limit 5 "
 
