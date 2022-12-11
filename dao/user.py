@@ -104,8 +104,7 @@ class UserDAO:
         query = "SELECT U.id_user, U.first_name, U.last_name, count(R.id_email) AS Inbox_Emails" \
                 " FROM \"user\" AS U " \
                 " INNER JOIN \"receive\" R on R.id_user = U.id_user" \
-                " INNER JOIN \"email\" E on E.id_email = R.id_email" \
-                " WHERE U.is_deleted = FALSE AND E.is_deleted_outbox = FALSE" \
+                " WHERE U.is_deleted = FALSE AND R.is_deleted = FALSE" \
                 " GROUP BY U.id_user,U.first_name, U.last_name" \
                 " order by count(R.id_email) Desc"\
                 " LIMIT 10"
@@ -209,7 +208,7 @@ class UserDAO:
                 "from receive R " \
                 "inner join email E on R.id_email = E.id_email " \
                 "inner join \"user\" U on E.id_user_from = U.id_user " \
-                "where R.id_user = %s AND E.is_deleted_outbox = FALSE " \
+                "where R.id_user = %s AND R.is_deleted = FALSE " \
                 "group by id_user_from, U.first_name, U.last_name  " \
                 "order by count(E.id_user_from) desc " \
                 "limit 5 "
