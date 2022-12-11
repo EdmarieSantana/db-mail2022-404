@@ -121,7 +121,7 @@ class UserDAO:
         query = "SELECT U.id_user, U.first_name, U.last_name, count(E.id_user_from) AS Outbox_Emails" \
                 " FROM \"user\" AS U " \
                 " INNER JOIN \"email\" E on E.id_user_from = U.id_user" \
-                " WHERE U.is_deleted = FALSE AND E.is_deleted_outbox = FALSE" \
+                " WHERE U.is_deleted = FALSE AND E.is_deleted_outbox = FALSE and U.id_user != 0" \
                 " GROUP BY U.id_user,U.first_name, U.last_name" \
                 " order by count(E.id_user_from) Desc"\
                 " LIMIT 10"
